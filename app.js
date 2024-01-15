@@ -7,8 +7,18 @@ const path = require('path');
 const app = express();
 const port = 3050;
 
+const ejs = require('ejs');
+app.set('view engine', 'ejs');
+
 // Connect to MongoDB
-mongoose.connect('mongodb+srv://sigurdowre:<Flodi123>@infokiosk.apraybf.mongodb.net/?retryWrites=true&w=majority', { useNewUrlParser: true, useUnifiedTopology: true });
+module.exports = async () => {
+    try {
+        await mongoose.connect(process.env.DB_URL, {});
+        console.log("CONNECTED TO DATABASE SUCCESSFULLY");
+    } catch (error) {
+        console.error('COULD NOT CONNECT TO DATABASE:', error.message);
+    }
+};
 
 // Create a Mongoose model for files
 const fileSchema = new mongoose.Schema({
@@ -45,9 +55,31 @@ app.post('/upload', upload.single('file'), async (req, res) => {
 
   try {
     const savedFile = await File.create(fileData);
-    res.json({ message: 'File and text uploaded successfully', file: savedFile });
+    res.redirect('/files'); // Redirect to the list of uploaded files
   } catch (error) {
     res.status(500).json({ error: 'Error saving file and text to database' });
+  }
+});
+
+// Define a route to display the list of uploaded files
+app.get('/files', async (req, res) => {
+  try {
+    const files = await File.find();
+    res.render('files', { files });
+  } catch (error) {
+    res.status(500).json({ error: 'Error fetching files from the database' });
+  }
+});
+
+// Define a route to handle file removal
+app.post('/remove', async (req, res) => {
+  const { fileId } = req.body;
+
+  try {
+    const removedFile = await File.findByIdAndRemove(fileId);
+    res.json({ message: 'File removed successfully', file: removedFile });
+  } catch (error) {
+    res.status(500).json({ error: 'Error removing file from the database' });
   }
 });
 

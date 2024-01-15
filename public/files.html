@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Uploaded Files</title>
+</head>
+<body>
+  <h1>Uploaded Files</h1>
+  <ul>
+    <% files.forEach(file => { %>
+      <li>
+        <img src="<%= file.filepath %>" alt="<%= file.filename %>">
+        <p><%= file.text %></p>
+        <form action="/remove" method="post">
+          <input type="hidden" name="fileId" value="<%= file._id %>">
+          <button type="submit">Remove</button>
+        </form>
+      </li>
+    <% }) %>
+  </ul>
+</body>
+</html>
