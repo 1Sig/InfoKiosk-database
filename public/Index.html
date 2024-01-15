@@ -8,12 +8,15 @@
     <title>File Management</title>
 </head>
 <body>
-    <h1>File Upload</h1>
+    <h1>File and Text Upload Example</h1>
     <form action="/upload" method="post" enctype="multipart/form-data">
-        <input type="file" name="file" required>
-        <button type="submit">Upload File</button>
-      </form>
-    <ul id="fileList"></ul>
-    <script src="script.js"></script>
-</body>
-</html>
+      <label for="file">Upload Picture:</label>
+      <input type="file" name="file" accept="image/*" required>
+      
+      <label for="text">Enter Picture Text:</label>
+      <input type="text" name="text" required>
+      
+      <button type="submit">Upload</button>
+    </form>
+  </body>
+  </html>
