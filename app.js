@@ -11,14 +11,7 @@ const ejs = require('ejs');
 app.set('view engine', 'ejs');
 
 // Connect to MongoDB
-module.exports = async () => {
-    try {
-        await mongoose.connect(process.env.DB_URL, {});
-        console.log("CONNECTED TO DATABASE SUCCESSFULLY");
-    } catch (error) {
-        console.error('COULD NOT CONNECT TO DATABASE:', error.message);
-    }
-};
+mongoose.connect('mongodb+srv://sigurdowre:<Flodi123>@infokiosk.apraybf.mongodb.net/?retryWrites=true&w=majority');
 
 // Create a Mongoose model for files
 const fileSchema = new mongoose.Schema({
