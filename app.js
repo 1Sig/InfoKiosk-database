@@ -3,6 +3,7 @@ const express = require('express');
 const mongoose = require('mongoose');
 const multer = require('multer');
 const path = require('path');
+const { MongoClient, ServerApiVersion } = require('mongodb');
 
 const app = express();
 const port = 3050;
@@ -11,7 +12,15 @@ const ejs = require('ejs');
 app.set('view engine', 'ejs');
 
 // Connect to MongoDB
-mongoose.connect('mongodb+srv://sigurdowre:<Flodi123>@infokiosk.apraybf.mongodb.net/?retryWrites=true&w=majority');
+const uri = "mongodb+srv://sigurdowre:<password>@infokiosk.w7sqkux.mongodb.net/?retryWrites=true&w=majority";
+// Create a MongoClient with a MongoClientOptions object to set the Stable API version
+const client = new MongoClient(uri, {
+  serverApi: {
+    version: ServerApiVersion.v1,
+    strict: true,
+    deprecationErrors: true,
+  }
+});
 
 // Create a Mongoose model for files
 const fileSchema = new mongoose.Schema({
