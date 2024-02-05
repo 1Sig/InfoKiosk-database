@@ -3,28 +3,30 @@ const express = require('express');
 const mongoose = require('mongoose');
 const multer = require('multer');
 const path = require('path');
-const { MongoClient, ServerApiVersion } = require('mongodb');
+const { connectToDb, getDb } = require('./db')
 
 const app = express();
 const PORT = 3050;
 
+// db connection
+let db
+
+connectToDb((err) => {
+  if (!err) {
+    app.listen(PORT, () => {
+      console.log(`Server is running on http://localhost:${PORT}`);
+    })
+    db = getDb()
+  }
+})
+
 const ejs = require('ejs');
 app.set('view engine', 'ejs');
-
-// Connect to MongoDB
-const uri = "mongodb+srv://sigurdowre:<password>@infokiosk.w7sqkux.mongodb.net/?retryWrites=true&w=majority";
-// Create a MongoClient with a MongoClientOptions object to set the Stable API version
-const client = new MongoClient(uri, {
-  serverApi: {
-    version: ServerApiVersion.v1,
-    strict: true,
-    deprecationErrors: true,
-  }
-});
-
+/*
 const fileSchema = new mongoose.Schema({
   filename: String,
-  filepath: String,
+  data: Buffer, // Use Buffer to store binary data
+  text: String,
 });
 
 const File = mongoose.model('File', fileSchema);
@@ -50,20 +52,34 @@ app.get('/', (req, res) => {
 
 app.post('/upload', upload.single('file'), async (req, res) => {
   const { filename, path } = req.file;
-  const fileData = { filename, filepath: path };
-
   try {
-    const savedFile = await File.create(fileData);
-    res.redirect('/files');
+    // Read the file as binary data
+    const data = await fs.promises.readFile(path);
+    // Encode the binary data as base64
+    const base64Data = data.toString('base64');
+    // Save the file data to the database
+    const savedFile = await File.create({ filename, data: Buffer.from(base64Data, 'base64') });
+    // Respond with a JSON object containing the base64-encoded data
+    res.json({ message: 'File uploaded successfully', file: savedFile });
   } catch (error) {
+    console.error('Error saving file to database:', error);
     res.status(500).json({ error: 'Error saving file to database' });
   }
 });
 
+
 app.get('/files', async (req, res) => {
   try {
     const files = await File.find();
-    res.render('files', { files });
+
+    // Convert each file's data to base64 for JSON response
+    const filesWithBase64Data = files.map(file => ({
+      filename: file.filename,
+      data: file.data.toString('base64'),
+      text: file.text,
+    }));
+
+    res.json(filesWithBase64Data);
   } catch (error) {
     res.status(500).json({ error: 'Error fetching files from the database' });
   }
@@ -79,7 +95,7 @@ app.post('/remove', async (req, res) => {
     res.status(500).json({ error: 'Error removing file from the database' });
   }
 });
-
+*/
 app.listen(PORT, () => {
   console.log(`Server is running on http://localhost:${PORT}`);
 });
