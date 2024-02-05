@@ -13,15 +13,29 @@ let db
 
 connectToDb((err) => {
   if (!err) {
-    app.listen(PORT, () => {
-      console.log(`Server is running on http://localhost:${PORT}`);
-    })
     db = getDb()
   }
 })
 
-const ejs = require('ejs');
-app.set('view engine', 'ejs');
+// route
+app.get('/files', ( req, res) => {
+  let files = []
+
+  db.collection('files')
+  .find()
+  .forEach(file => files.push(file)) 
+  .then(() => {
+    res.status(200).json(files)
+  })
+  .catch(() => {
+    res.status(500).json({error: Couldnt fetch files})
+  })
+
+  res.json({mssg: "welcome to the api"})
+})
+
+// const ejs = require('ejs');
+// app.set('view engine', 'ejs');
 /*
 const fileSchema = new mongoose.Schema({
   filename: String,
