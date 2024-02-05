@@ -1,38 +1,63 @@
-// server.js
 const express = require('express');
 const mongoose = require('mongoose');
 const multer = require('multer');
 const path = require('path');
-const { connectToDb, getDb } = require('./db')
+const { connectToDb, getDb } = require('./db');
 
 const app = express();
 const PORT = 3050;
 
 // db connection
-let db
+let db;
 
 connectToDb((err) => {
   if (!err) {
-    db = getDb()
+    db = getDb();
   }
-})
+});
 
-// route
-app.get('/files', ( req, res) => {
-  let files = []
+// Multer storage configuration
+const storage = multer.diskStorage({
+  destination: function (req, file, cb) {
+    cb(null, 'uploads/'); // Specify the destination folder for uploaded files
+  },
+  filename: function (req, file, cb) {
+    cb(null, file.fieldname + '-' + Date.now() + path.extname(file.originalname));
+  },
+});
+
+const upload = multer({ storage: storage });
+
+// route for file upload
+app.post('/upload', upload.single('file'), (req, res) => {
+  const { file } = req;
+  const { originalname, filename, path } = file;
+
+  // Save file details to MongoDB
+  db.collection('files').insertOne({
+    originalname,
+    filename,
+    path,
+  });
+
+  res.json({ message: 'File uploaded successfully.' });
+});
+
+// route for fetching files
+app.get('/files', (req, res) => {
+  let files = [];
 
   db.collection('files')
-  .find()
-  .forEach(file => files.push(file)) 
-  .then(() => {
-    res.status(200).json(files)
-  })
-  .catch(() => {
-    res.status(500).json({error: Couldnt fetch files})
-  })
+    .find()
+    .forEach((file) => files.push(file))
+    .then(() => {
+      res.status(200).json(files);
+    });
+});
 
-  res.json({mssg: "welcome to the api"})
-})
+app.listen(PORT, () => {
+  console.log(`Server is running on port ${PORT}`);
+});
 
 // const ejs = require('ejs');
 // app.set('view engine', 'ejs');
