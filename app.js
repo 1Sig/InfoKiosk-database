@@ -1,11 +1,14 @@
 const express = require('express');
-const mongoose = require('mongoose');
-const multer = require('multer');
 const path = require('path');
+const { MongoClient, Binary } = require('mongodb');
 const { connectToDb, getDb } = require('./db');
 
 const app = express();
 const PORT = 3050;
+
+app.get('/', function(req, res) {
+  res.sendFile(path.join(__dirname, '/public/index.html'));
+});
 
 // db connection
 let db;
@@ -16,51 +19,49 @@ connectToDb((err) => {
   }
 });
 
-// Multer storage configuration
-const storage = multer.diskStorage({
-  destination: function (req, file, cb) {
-    cb(null, 'uploads/'); // Specify the destination folder for uploaded files
-  },
-  filename: function (req, file, cb) {
-    cb(null, file.fieldname + '-' + Date.now() + path.extname(file.originalname));
-  },
-});
-
-const upload = multer({ storage: storage });
-
 // route for file upload
-app.post('/upload', upload.single('file'), (req, res) => {
-  const { file } = req;
-  const { originalname, filename, path } = file;
+app.post('/upload', async (req, res) => {
+  try {
+    const { file, format } = req.body; // Assuming the file and format are sent in the request body
 
-  // Save file details to MongoDB
-  db.collection('files').insertOne({
-    originalname,
-    filename,
-    path,
-  });
+    // Validate the format against supported formats
+    const supportedFormats = ['jpg', 'jpeg', 'png', 'gif', 'webp'];
+    if (!supportedFormats.includes(format)) {
+      return res.status(400).json({ error: 'Unsupported format' });
+    }
 
-  res.json({ message: 'File uploaded successfully.' });
+    // Convert the base64-encoded string to a Buffer
+    const binaryData = Buffer.from(file, 'base64');
+
+    // Save file details to MongoDB with Binary data and format
+    await db.collection('files').insertOne({
+      data: new Binary(binaryData),
+      contentType: `image/${format}`,
+    });
+
+    res.json({ message: 'File uploaded successfully.' });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: 'Internal Server Error' });
+  }
 });
 
 // route for fetching files
-app.get('/files', (req, res) => {
-  let files = [];
-
-  db.collection('files')
-    .find()
-    .forEach((file) => files.push(file))
-    .then(() => {
-      res.status(200).json(files);
-    });
+app.get('/files', async (req, res) => {
+  try {
+    const files = await db.collection('files').find().toArray();
+    res.status(200).json(files);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: 'Internal Server Error' });
+  }
 });
 
 app.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}`);
 });
 
-// const ejs = require('ejs');
-// app.set('view engine', 'ejs');
+
 /*
 const fileSchema = new mongoose.Schema({
   filename: String,
@@ -135,6 +136,3 @@ app.post('/remove', async (req, res) => {
   }
 });
 */
-app.listen(PORT, () => {
-  console.log(`Server is running on http://localhost:${PORT}`);
-});
