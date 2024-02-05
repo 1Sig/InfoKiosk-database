@@ -1,25 +1,17 @@
-<!-- public/index.html -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="Styles.CSS">
-    <title>File Management</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>File Upload Example</title>
 </head>
 <body>
-    <h1>File and Text Upload Example</h1>
-    <form action="/upload" method="post" enctype="multipart/form-data">
-      <label for="file">Upload Picture:</label>
-      <input type="file" name="file" accept="image/*" required>
-      
-      <label for="text">Enter Picture Text:</label>
-      <input type="text" name="text" required>
-      
-      <button type="submit">Upload</button>
-    </form>
-
-    <!-- Add the script tag to include your application's JavaScript code -->
-<!--    <script src="app.js"></script> -->
+  <h1>File Upload Example</h1>
+  <form action="/upload" method="post" enctype="multipart/form-data">
+    <label for="file">Upload Picture:</label>
+    <input type="file" name="file" accept="image/*" required>
+    <button type="submit">Upload</button>
+  </form>
 </body>
+<script src="app.js"></script>
 </html>

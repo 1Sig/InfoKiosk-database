@@ -6,7 +6,7 @@ const path = require('path');
 const { MongoClient, ServerApiVersion } = require('mongodb');
 
 const app = express();
-const port = 3050;
+const PORT = 3050;
 
 const ejs = require('ejs');
 app.set('view engine', 'ejs');
@@ -22,11 +22,9 @@ const client = new MongoClient(uri, {
   }
 });
 
-// Create a Mongoose model for files
 const fileSchema = new mongoose.Schema({
   filename: String,
   filepath: String,
-  text: String,
 });
 
 const File = mongoose.model('File', fileSchema);
@@ -40,30 +38,28 @@ const storage = multer.diskStorage({
 
 const upload = multer({ storage: storage });
 
-// Express to serve static files and handle file uploads
+app.set('view engine', 'ejs');
+
 app.use(express.static('public'));
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 
-// Define routes
 app.get('/', (req, res) => {
   res.sendFile(path.join(__dirname, 'index.html'));
 });
 
 app.post('/upload', upload.single('file'), async (req, res) => {
   const { filename, path } = req.file;
-  const { text } = req.body;
-  const fileData = { filename, filepath: path, text };
+  const fileData = { filename, filepath: path };
 
   try {
     const savedFile = await File.create(fileData);
-    res.redirect('/files'); // Redirect to the list of uploaded files
+    res.redirect('/files');
   } catch (error) {
-    res.status(500).json({ error: 'Error saving file and text to database' });
+    res.status(500).json({ error: 'Error saving file to database' });
   }
 });
 
-// Define a route to display the list of uploaded files
 app.get('/files', async (req, res) => {
   try {
     const files = await File.find();
@@ -73,7 +69,6 @@ app.get('/files', async (req, res) => {
   }
 });
 
-// Define a route to handle file removal
 app.post('/remove', async (req, res) => {
   const { fileId } = req.body;
 
@@ -85,6 +80,6 @@ app.post('/remove', async (req, res) => {
   }
 });
 
-app.listen(port, () => {
-  console.log(`Server is running on http://localhost:${port}`);
+app.listen(PORT, () => {
+  console.log(`Server is running on http://localhost:${PORT}`);
 });
