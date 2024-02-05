@@ -7,11 +7,22 @@
 </head>
 <body>
   <h1>File Upload Example</h1>
-  <form action="/upload" method="post" enctype="multipart/form-data">
-    <label for="file">Upload Picture:</label>
-    <input type="file" name="file" accept="image/*" required>
-    <button type="submit">Upload</button>
+  <form id="uploadForm" enctype="multipart/form-data">
+    <label for="file">Select Image:</label>
+    <input type="file" id="file" name="file" accept="image/*" required>
+    
+    <label for="format">Select Format:</label>
+    <select id="format" name="format" required>
+      <option value="jpg">JPG (jpg)</option>
+      <option value="jpeg">JPEG (jpeg)</option>
+      <option value="png">PNG (png)</option>
+      <option value="gif">GIF (gif)</option>
+      <option value="webp">WebP (webp)</option>
+    </select>
+
+    <button type="button" onclick="uploadFile()">Upload</button>
   </form>
+
 </body>
 <script src="app.js"></script>
 </html>

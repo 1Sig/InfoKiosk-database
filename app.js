@@ -17,7 +17,7 @@ connectToDb((err) => {
   if (!err) {
     db = getDb();
   }
-});
+}); 
 
 // route for file upload
 app.post('/upload', async (req, res) => {
